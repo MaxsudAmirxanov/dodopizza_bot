@@ -1,8 +1,9 @@
 from unicodedata import category
 from aiogram.utils.callback_data import CallbackData
 from sqlalchemy import subquery
-from utils.db_api.db_commands import get_categories, count_item, get_subcategories, get_items
+# from menu_keyboard import get_categories, count_item, get_subcategories, get_items
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from utils.db_api.db_commands_2 import get_all_database, get_subcategories, get_items
 
 menu_cd = CallbackData("show_menu", "level", "category", "subcategory", "item_id")
 buy_item = CallbackData("buy", "item_id")
@@ -12,13 +13,16 @@ def make_callback_data(level, category='0', subcategory='0', item_id='0'):
 
 async def categories_keyboard():
     CURRENT_LEVEL = 0
-    markup = InlineKeyboardMarkup()
+    markup = InlineKeyboardMarkup(row_width=1)
 
-    catrgories = await get_categories()
+    catrgories = get_all_database()
+    print(catrgories)
+    
     for category in catrgories:
-        number_of_items = await count_item(category.cetegory_code)
-        button_text = f"{category.cetegory_name} ({number_of_items} шт)"
-        callback_data = make_callback_data(level=CURRENT_LEVEL + 1, category=category.category_name)
+        
+        button_text = f"{category[0]}"
+        callback_data = make_callback_data(level=CURRENT_LEVEL + 1, category=category[1])
+        print(callback_data)
 
         markup.insert(
             InlineKeyboardButton(text=button_text, callback_data=callback_data)
@@ -26,15 +30,17 @@ async def categories_keyboard():
     return markup
 
 async def subcategories_keyboard(category):
+
     CURRENT_LEVEL = 1
     markup = InlineKeyboardMarkup()
 
-    subcategories = await get_subcategories(category)
+    subcategories = get_subcategories(category)
+    print(subcategories)
+    print(category)
     for subcategory in subcategories:
-        number_of_items = await count_item(category_code = category, subcatrgory_code=subcategory)
 
-        button_text = f"{subcategory.subcategory_code} ({number_of_items} шт)"
-        callback_data = make_callback_data(level=CURRENT_LEVEL + 1, category=category,subcategory=subcategory.category_code)
+        button_text = f"{subcategory[0]}"
+        callback_data = make_callback_data(level=CURRENT_LEVEL + 1, category=category,subcategory=subcategory[1])
 
 
         markup.insert(
@@ -50,10 +56,11 @@ async def items_keyboard(category, subcategory):
     CURRENT_LEVEL = 2
     markup = InlineKeyboardMarkup(row_width=1)
 
-    items = await get_items(category, subcategory)
+    items = get_items(category, subcategory)
+    print(f'3. {items}')
     for item in items:
-        button_text = f"{item.name} - {item.price}р"
-        callback_data = make_callback_data(level=CURRENT_LEVEL + 1, category=category, subcategory=subcategory, item_id=item.id)
+        button_text = f"{item[5]} - {item[7]}р"
+        callback_data = make_callback_data(level=CURRENT_LEVEL + 1, category=category, subcategory=subcategory, item_id=item[5])
 
         markup.insert(
             InlineKeyboardButton(text=button_text, callback_data=callback_data)
@@ -68,6 +75,7 @@ async def items_keyboard(category, subcategory):
     return markup
 
 def item_keyboard(category, subcategory, item_id):
+    print(f'4. {item_id}')
     CURRENT_LEVEL = 3
     markup = InlineKeyboardMarkup()
 
@@ -82,3 +90,4 @@ def item_keyboard(category, subcategory, item_id):
         )
     )
     return markup
+

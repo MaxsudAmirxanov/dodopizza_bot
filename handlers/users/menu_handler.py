@@ -3,7 +3,7 @@ from aiogram import types
 
 from typing import Union
 from loader import dp
-from utils.db_api.db_commands import get_item
+from utils.db_api.db_commands_2 import get_item
 
 from keyboards.inline.menu_keyboards import categories_keyboard, items_keyboard, subcategories_keyboard, item_keyboard, menu_cd
 
@@ -16,6 +16,7 @@ async def list_categories(message: Union[types.Message, types.CallbackGame], **k
 
     if isinstance(message, types.Message):
         await message.answer("Смотри што у нас есть", reply_markup=markup)
+        
 
     elif isinstance(message, types.CallbackQuery):
         call = message
@@ -32,17 +33,20 @@ async def list_item(callback: types.CallbackQuery, category, subcategory, **kwar
 async def show_item(callback: types.CallbackQuery, category, subcategory, item_id):
     markup = item_keyboard(category, subcategory, item_id)
 
-    item = await get_item(item_id)
-    text = f"Купи {item}"
+    item = get_item(category, subcategory, item_id)
+    print(item)
+    print('111--------------------')
+    text = f"Купи {item[0][5]} - {item[0][7]}"
     await callback.message.edit_text(text, reply_markup=markup)
 
 
 @dp.callback_query_handler(menu_cd.filter())
-async def navigate(call: types.CallbackQuery, callbakc_data: dict):
-    current_level = callbakc_data.get('level')
-    category = callbakc_data.get('category')
-    subcategory = callbakc_data.get('subcategory')
-    item_id = callbakc_data.get('item_id')
+async def navigate(call: types.CallbackQuery, callback_data: dict):
+    current_level = callback_data.get('level')
+    category = callback_data.get('category')
+    subcategory = callback_data.get('subcategory')
+    item_id = callback_data.get('item_id')
+    print(f'5. {callback_data}')
 
     levels = {
         "0": list_categories,
