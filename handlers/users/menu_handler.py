@@ -7,7 +7,7 @@ from utils.db_api.db_commands_2 import get_item
 
 from keyboards.inline.menu_keyboards import categories_keyboard, items_keyboard, subcategories_keyboard, item_keyboard, menu_cd
 
-@dp.message_handler(Command('menu'))
+@dp.message_handler(text="🍴 Менью")
 async def show_menu(message: types.Message):
     await list_categories(message)
 
@@ -36,7 +36,7 @@ async def show_item(callback: types.CallbackQuery, category, subcategory, item_i
     item = get_item(category, subcategory, item_id)
     print(item)
     print('111--------------------')
-    text = f"Купи {item[0][5]} - {item[0][7]}"
+    text = f"{item[0][5]} - {item[0][7]}р"
     await callback.message.edit_text(text, reply_markup=markup)
 
 

@@ -78,6 +78,10 @@ def item_keyboard(category, subcategory, item_id):
     print(f'4. {item_id}')
     CURRENT_LEVEL = 3
     markup = InlineKeyboardMarkup()
+    markup.add(
+       InlineKeyboardButton(text="➕", callback_data='add'),
+       InlineKeyboardButton(text="➖", callback_data='remove')
+    )
 
     markup.row(
        InlineKeyboardButton(text="Купить", callback_data=buy_item.new(item_id=item_id))

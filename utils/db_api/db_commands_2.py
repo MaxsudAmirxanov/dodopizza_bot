@@ -3,34 +3,6 @@ import psycopg2
 from data.config import  PGUSER, PGPASSWORD, DATABASE
 import asyncio
 host = '127.0.0.1'
-def read_id():
-    try:
-        #connect to exist database
-        connection = psycopg2.connect(
-            host=host,
-            user=PGUSER,
-            password=PGPASSWORD,
-            database = DATABASE
-        )
-        connection.autocommit = True
-
-        with connection.cursor() as cursor:
-            cursor.execute(
-                'select max(items_2.id) from items_2;'
-            )
-            # print(cursor.fetchall()) 
-            # print(1)
-            return cursor.fetchall()
-   
-            
-
-    except Exception as _ex:
-        print('[INFO] Error while working with PostgreSQL', _ex)
-
-    finally:
-        if connection:
-            connection.close()
-            print('[INFO] PostgreSQL connection closed')  
 
 def get_all_database():
     try:
@@ -45,7 +17,7 @@ def get_all_database():
 
         with connection.cursor() as cursor:
             cursor.execute(
-                'select distinct items_2.category_name, items_2.category_code from items_2;'
+                'select distinct product.category_name, product.category_code from product;'
             )
             # print(cursor.fetchall()) 
             # print(1)
@@ -75,7 +47,7 @@ def get_categories():
 
         with connection.cursor() as cursor:
             cursor.execute(
-                'select items_2.category_name from items_2;'
+                'select product.category_name from product;'
             )
             # print(cursor.fetchall()) 
             # print(1)
@@ -104,7 +76,7 @@ def get_categories():
 
 #         with connection.cursor() as cursor:
 #             cursor.execute(
-#                 'select items.subcategory_name from items_2;'
+#                 'select items.subcategory_name from product;'
 #             )
 #             # print(cursor.fetchall()) 
 #             # print(1)
@@ -132,7 +104,7 @@ def get_subcategories(category_code):
 
         with connection.cursor() as cursor:
             cursor.execute(
-                "select distinct items_2.subcategory_name, items_2.subcategory_code from items_2 where items_2.category_code=%s;", ((category_code,))
+                "select distinct product.subcategory_name, product.subcategory_code from product where product.category_code=%s;", ((category_code,))
             )
             # print(cursor.fetchall())
             # print(1)
@@ -164,7 +136,7 @@ def get_items(category_code, subcategory_code):
 
         with connection.cursor() as cursor:
             cursor.execute(
-                "select * from items_2 where subcategory_code=%s and category_code=%s; ", (subcategory_code, category_code)
+                "select * from product where subcategory_code=%s and category_code=%s; ", (subcategory_code, category_code)
             )
             # print(cursor.fetchall())
             # print(1)
@@ -191,12 +163,10 @@ def get_item(category_code, subcategory_code, item_id):
             database = DATABASE
         )
         connection.autocommit = True
-        number = read_id()
-        new_number = number[0][0] +1
 
         with connection.cursor() as cursor:
             cursor.execute(
-                "select * from items_2 where items_2.category_code=%s and items_2.subcategory_code=%s and items_2.name=%s; ", (category_code, subcategory_code, item_id)
+                "select * from product where product.category_code=%s and product.subcategory_code=%s and product.name=%s; ", (category_code, subcategory_code, item_id)
             )
             # print(cursor.fetchall())
             # print(1)
@@ -223,12 +193,11 @@ def add_item(name, category_code, category_name, subcategory_code, subcategory_n
             database = DATABASE
         )
         connection.autocommit = True
-        number = read_id()
-        new_number = number[0][0] +1
+
 
         with connection.cursor() as cursor:
             cursor.execute(
-                "insert into items_2 (id, category_code, category_name, subcategory_code, subcategory_name, name, photo, price) values (%s, %s, %s, %s, %s, %s, %s, %s) returning items_2;", (new_number, category_code, category_name, subcategory_code, subcategory_name, name, photo, price) 
+                "insert into product (category_code, category_name, subcategory_code, subcategory_name, name, photo, price) values (%s, %s, %s, %s, %s, %s, %s) returning product;", (category_code, category_name, subcategory_code, subcategory_name, name, photo, price) 
             )
             # print(cursor.fetchall())
             # print(1)
