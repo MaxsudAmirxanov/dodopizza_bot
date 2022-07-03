@@ -2,7 +2,7 @@ from aiogram.types import ReplyKeyboardRemove, \
     ReplyKeyboardMarkup, KeyboardButton, \
     InlineKeyboardMarkup, InlineKeyboardButton
 
-button_1 = KeyboardButton('🍴 Менью')
+button_1 = KeyboardButton('🍴 Меню')
 button_2 = KeyboardButton('👨‍💼 О нас')
 button_3 = KeyboardButton('🛒 Корзина')
 button_4 = KeyboardButton('📝 Заказы')

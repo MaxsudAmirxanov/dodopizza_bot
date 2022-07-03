@@ -33,7 +33,6 @@ def get_all_database():
             connection.close()
             print('[INFO] PostgreSQL connection closed')  
 
-
 def get_categories():
     try:
         #connect to exist database
@@ -63,34 +62,6 @@ def get_categories():
             connection.close()
             print('[INFO] PostgreSQL connection closed')  
 
-# def get_subcategories():
-#     try:
-#         #connect to exist database
-#         connection = psycopg2.connect(
-#             host=host,
-#             user=user,
-#             password=password,
-#             database = db_name
-#         )
-#         connection.autocommit = True
-
-#         with connection.cursor() as cursor:
-#             cursor.execute(
-#                 'select items.subcategory_name from product;'
-#             )
-#             # print(cursor.fetchall()) 
-#             # print(1)
-#             return cursor.fetchall()
-   
-            
-
-    # except Exception as _ex:
-    #     print('[INFO] Error while working with PostgreSQL', _ex)
-
-    # finally:
-    #     if connection:
-    #         connection.close()
-    #         print('[INFO] PostgreSQL connection closed') 
 def get_subcategories(category_code):
     try:
         #connect to exist database
@@ -119,8 +90,6 @@ def get_subcategories(category_code):
         if connection:
             connection.close()
             print('[INFO] PostgreSQL connection closed')  
-
- 
 
 def get_items(category_code, subcategory_code):
     try:
@@ -152,7 +121,6 @@ def get_items(category_code, subcategory_code):
             connection.close()
             print('[INFO] PostgreSQL connection closed')  
 
-
 def get_item(category_code, subcategory_code, item_id):
     try:
         #connect to exist database
@@ -166,7 +134,7 @@ def get_item(category_code, subcategory_code, item_id):
 
         with connection.cursor() as cursor:
             cursor.execute(
-                "select * from product where product.category_code=%s and product.subcategory_code=%s and product.name=%s; ", (category_code, subcategory_code, item_id)
+                "select * from product where product.category_code=%s and product.subcategory_code=%s and product.id=%s; ", (category_code, subcategory_code, item_id)
             )
             # print(cursor.fetchall())
             # print(1)
@@ -181,7 +149,6 @@ def get_item(category_code, subcategory_code, item_id):
         if connection:
             connection.close()
             print('[INFO] PostgreSQL connection closed')  
-
 
 def add_item(name, category_code, category_name, subcategory_code, subcategory_name, photo, price):
     try:
@@ -213,9 +180,6 @@ def add_item(name, category_code, category_name, subcategory_code, subcategory_n
             connection.close()
             print('[INFO] PostgreSQL connection closed')  
 
-# add_new_customer('Тема', 158347, 'ndbwu@gmail.com')
-
-
 def delete_user(id):
     try:
         #connect to exist database
@@ -243,10 +207,226 @@ def delete_user(id):
             connection.close()
             print('[INFO] PostgreSQL connection closed') 
 
+def add_to_cart(user_id, product_id, count):
+    try:
+        #connect to exist database
+        connection = psycopg2.connect(
+            host=host,
+            user=PGUSER,
+            password=PGPASSWORD,
+            database = DATABASE
+        )
+        connection.autocommit = True
 
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "insert into cart (user_id, product_id, product_count) values (%s, %s, %s) returning cart;", (user_id, product_id, count) 
+            )
+            print(cursor.fetchall())
+            # print(1)
+            # return cursor.fetchall()
+            
+    except Exception as _ex:
+        print('[INFO] Error while working with PostgreSQL', _ex)
+
+    finally:
+        if connection:
+            connection.close()
+            print('[INFO] PostgreSQL connection closed') 
+
+def add_customer(name, last_name, user_name, user_id):
+    try:
+        #connect to exist database
+        connection = psycopg2.connect(
+            host=host,
+            user=PGUSER,
+            password=PGPASSWORD,
+            database = DATABASE
+        )
+        connection.autocommit = True
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "insert into customer (name, last_name, user_name, user_id) values (%s, %s, %s, %s) returning customer;", (name, last_name, user_name, user_id) 
+
+            )
+            print(cursor.fetchall())
+            # print(1)
+            # return cursor.fetchall()
+            
+    except Exception as _ex:
+        print('[INFO] Error while working with PostgreSQL', _ex)
+
+    finally:
+        if connection:
+            connection.close()
+            print('[INFO] PostgreSQL connection closed') 
+
+def read_user_id():
+    try:
+        #connect to exist database
+        connection = psycopg2.connect(
+            host=host,
+            user=PGUSER,
+            password=PGPASSWORD,
+            database = DATABASE
+        )
+        connection.autocommit = True
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "select user_id from customer;"
+            )
+            # print(f"1111111111111111111 {cursor.fetchall()}")
+            # print(1)
+            return cursor.fetchall()
+            
+    except Exception as _ex:
+        print('[INFO] Error while working with PostgreSQL', _ex)
+
+    finally:
+        if connection:
+            connection.close()
+            print('[INFO] PostgreSQL connection closed') 
+
+def find_user_id(id):
+    try:
+        #connect to exist database
+        connection = psycopg2.connect(
+            host=host,
+            user=PGUSER,
+            password=PGPASSWORD,
+            database = DATABASE
+        )
+        connection.autocommit = True
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "select id from customer as c where user_id=%s;", (str(id),)
+            )
+            # print(f"1111111111111111111 {cursor.fetchall()}")
+            # print(1)
+            return cursor.fetchall()
+            
+    except Exception as _ex:
+        print('[INFO] Error while working with PostgreSQL', _ex)
+
+    finally:
+        if connection:
+            connection.close()
+            print('[INFO] PostgreSQL connection closed') 
+
+def get_cart(user_id):
+    try:
+        #connect to exist database
+        connection = psycopg2.connect(
+            host=host,
+            user=PGUSER,
+            password=PGPASSWORD,
+            database = DATABASE
+        )
+        connection.autocommit = True
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "select * from cart where user_id=%s;", (str(user_id),)
+            )
+            # print(cursor.fetchall())
+            # print(1)
+            return cursor.fetchall()
+            
+    except Exception as _ex:
+        print('[INFO] Error while working with PostgreSQL', _ex)
+
+    finally:
+        if connection:
+            connection.close()
+            print('[INFO] PostgreSQL connection closed') 
+
+def get_product(id):
+    try:
+        #connect to exist database
+        connection = psycopg2.connect(
+            host=host,
+            user=PGUSER,
+            password=PGPASSWORD,
+            database = DATABASE
+        )
+        connection.autocommit = True
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "select * from product where id=%s;", (str(id),)
+            )
+            # print(cursor.fetchall())
+            # print(1)
+            return cursor.fetchall()
+            
+    except Exception as _ex:
+        print('[INFO] Error while working with PostgreSQL', _ex)
+
+    finally:
+        if connection:
+            connection.close()
+            print('[INFO] PostgreSQL connection closed') 
+
+def rm_cart_product(product_id, user_id):
+    try:
+        #connect to exist database
+        connection = psycopg2.connect(
+            host=host,
+            user=PGUSER,
+            password=PGPASSWORD,
+            database = DATABASE
+        )
+        connection.autocommit = True
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "delete from cart where user_id=%s and id=%s;", (user_id, product_id)
+            )
+            # print(cursor.fetchall())
+            # print(1)
+            # return cursor.fetchall()
+            
+    except Exception as _ex:
+        print('[INFO] Error while working with PostgreSQL', _ex)
+
+    finally:
+        if connection:
+            connection.close()
+            print('[INFO] PostgreSQL connection closed') 
+
+def get_cart_product(cart_id):
+    try:
+        #connect to exist database
+        connection = psycopg2.connect(
+            host=host,
+            user=PGUSER,
+            password=PGPASSWORD,
+            database = DATABASE
+        )
+        connection.autocommit = True
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "select * from cart where id=%s;", (str(cart_id),)
+            )
+            # print(cursor.fetchall())
+            # print(1)
+            return cursor.fetchall()
+            
+    except Exception as _ex:
+        print('[INFO] Error while working with PostgreSQL', _ex)
+
+    finally:
+        if connection:
+            connection.close()
+            print('[INFO] PostgreSQL connection closed') 
 
 # pizza = 'pizza'
 # vegan = 'vegan'
 # print(get_items(pizza, vegan))
+
 
 

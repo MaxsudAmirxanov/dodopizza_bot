@@ -3,13 +3,17 @@ from aiogram.utils.callback_data import CallbackData
 from sqlalchemy import subquery
 # from menu_keyboard import get_categories, count_item, get_subcategories, get_items
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from utils.db_api.db_commands_2 import get_all_database, get_subcategories, get_items
+from utils.db_api.db_commands_2 import get_all_database, get_subcategories, get_items, get_cart_product
 
-menu_cd = CallbackData("show_menu", "level", "category", "subcategory", "item_id")
+menu_cd = CallbackData("show_menu", "level", "category", "subcategory", "item_id", "count", "cart_product_id", "number_cart")
 buy_item = CallbackData("buy", "item_id")
 
-def make_callback_data(level, category='0', subcategory='0', item_id='0'):
-    return menu_cd.new(level=level, category=category, subcategory=subcategory, item_id=item_id)
+def make_callback_data(level, category='0', subcategory='0', item_id='0', count=1, cart_product_id='0', number_cart='0'):
+    return menu_cd.new(level=level, category=category, subcategory=subcategory, item_id=item_id, count=count, cart_product_id=cart_product_id)
+
+# def make_callback_buy_item(buy, item_id, count):
+#     return buy_item.new(buy=buy, item_id='0', count=1 )
+
 
 async def categories_keyboard():
     CURRENT_LEVEL = 0
@@ -22,12 +26,13 @@ async def categories_keyboard():
         
         button_text = f"{category[0]}"
         callback_data = make_callback_data(level=CURRENT_LEVEL + 1, category=category[1])
-        print(callback_data)
+        print(f'0. {callback_data}')
 
         markup.insert(
             InlineKeyboardButton(text=button_text, callback_data=callback_data)
         )
     return markup
+
 
 async def subcategories_keyboard(category):
 
@@ -35,12 +40,13 @@ async def subcategories_keyboard(category):
     markup = InlineKeyboardMarkup()
 
     subcategories = get_subcategories(category)
-    print(subcategories)
+    print(f'1. {subcategories}')
     print(category)
     for subcategory in subcategories:
 
         button_text = f"{subcategory[0]}"
         callback_data = make_callback_data(level=CURRENT_LEVEL + 1, category=category,subcategory=subcategory[1])
+        print(callback_data)
 
 
         markup.insert(
@@ -57,10 +63,10 @@ async def items_keyboard(category, subcategory):
     markup = InlineKeyboardMarkup(row_width=1)
 
     items = get_items(category, subcategory)
-    print(f'3. {items}')
+    print(f'2. {items}')
     for item in items:
         button_text = f"{item[5]} - {item[7]}р"
-        callback_data = make_callback_data(level=CURRENT_LEVEL + 1, category=category, subcategory=subcategory, item_id=item[5])
+        callback_data = make_callback_data(level=CURRENT_LEVEL + 1, category=category, subcategory=subcategory, item_id=item[0])
 
         markup.insert(
             InlineKeyboardButton(text=button_text, callback_data=callback_data)
@@ -74,24 +80,60 @@ async def items_keyboard(category, subcategory):
     )
     return markup
 
-def item_keyboard(category, subcategory, item_id):
-    print(f'4. {item_id}')
+def item_keyboard(category, subcategory, item_id, price, count):
+    print(f'3. {item_id}')
+
+    sum = int(count) * int(price)
+    # count = 1
     CURRENT_LEVEL = 3
     markup = InlineKeyboardMarkup()
     markup.add(
-       InlineKeyboardButton(text="➕", callback_data='add'),
-       InlineKeyboardButton(text="➖", callback_data='remove')
+       InlineKeyboardButton(text="➕", callback_data=make_callback_data(level=CURRENT_LEVEL, category=category, subcategory=subcategory, item_id=item_id, count=int(count) + 1)),
+       InlineKeyboardButton(text="➖", callback_data=make_callback_data(level=CURRENT_LEVEL, category=category, subcategory=subcategory, item_id=item_id, count=int(count) - 1))
     )
 
     markup.row(
-       InlineKeyboardButton(text="Купить", callback_data=buy_item.new(item_id=item_id))
+       InlineKeyboardButton(text=f"✅ Добавить {count}шт - {sum}р", callback_data=make_callback_data(level=CURRENT_LEVEL -1, category=category, subcategory=subcategory, item_id=item_id, count=int(count)))
     )
 
     markup.row(
         InlineKeyboardButton(text='Назад', 
         callback_data=make_callback_data(level=CURRENT_LEVEL - 1, 
         category=category, subcategory=subcategory)
-        )
+        ),
+        InlineKeyboardButton(text="Корзина", callback_data=make_callback_data(level=CURRENT_LEVEL +1, category=category, subcategory=subcategory, item_id=item_id, count=int(count)))
     )
     return markup
 
+def buy_keyboard(item_id, cart_product_id, count, number_cart):
+    print(item_id)
+    print(2222222)
+    CURRENT_LEVEL = 4
+    markup = InlineKeyboardMarkup()
+    markup.add(
+       InlineKeyboardButton(text="Удалить", callback_data=make_callback_data(level=CURRENT_LEVEL + 2, cart_product_id=cart_product_id, item_id=item_id)),
+       InlineKeyboardButton(text="Изменить", callback_data=make_callback_data(level=CURRENT_LEVEL + 1, cart_product_id=cart_product_id, item_id=item_id,count=count, number_cart=number_cart))
+    )
+
+    return markup
+
+
+def edit_cart_keyboard(cart_product_id, item_id, count, number_cart):
+
+    CURRENT_LEVEL = 5
+    print(cart_product_id)
+    product = get_cart_product(cart_product_id)
+    print(f"_____________ {product}   {cart_product_id}")
+    # count = product[0][3]
+    print(count)
+    markup = InlineKeyboardMarkup()
+    markup.add(
+       InlineKeyboardButton(text="➕", callback_data=make_callback_data(level=CURRENT_LEVEL, cart_product_id=cart_product_id, item_id=item_id, count=int(count)+1)),
+       InlineKeyboardButton(text="➖", callback_data=make_callback_data(level=CURRENT_LEVEL, cart_product_id=cart_product_id, item_id=item_id, count=int(count)-1))
+    )
+
+    markup.row(
+        InlineKeyboardButton(text='Отмена', callback_data=make_callback_data(level=CURRENT_LEVEL -1, cart_product_id=cart_product_id, item_id=item_id, count=count, number_cart=number_cart)),
+        InlineKeyboardButton(text='Сохранить', callback_data=make_callback_data(level=CURRENT_LEVEL +2, cart_product_id=cart_product_id, item_id=item_id, count=count, number_cart=number_cart))
+    )
+    return markup
