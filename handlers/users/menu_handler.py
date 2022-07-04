@@ -107,8 +107,9 @@ async def rm_cart(callback: types.CallbackQuery, category, subcategory, item_id,
 
 
 async def show_cart(callback: types.CallbackQuery, category, subcategory, item_id, count, number_cart):
+    print(item_id)
 
-    await callback.message.edit_text(f"{number_cart}. {product[0][5]} - {i[3]}шт - {sum}p", reply_markup=markup)
+    # await callback.message.edit_text(f"{number_cart}. {product[0][5]} - {i[3]}шт - {sum}p", reply_markup=markup)
 
 
 
