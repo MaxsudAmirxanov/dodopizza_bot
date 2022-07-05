@@ -6,7 +6,7 @@ from loader import bot
 import logging
 from typing import Union
 from loader import dp
-from utils.db_api.db_commands_2 import get_item, add_to_cart, read_user_id, get_cart, find_user_id, get_product, rm_cart_product, get_cart_product
+from utils.db_api.db_commands_2 import edit_cart_product, get_item, add_to_cart, read_user_id, get_cart, find_user_id, get_product, rm_cart_product, get_cart_product
 
 from keyboards.inline.menu_keyboards import categories_keyboard, items_keyboard, subcategories_keyboard, item_keyboard, menu_cd, buy_keyboard, edit_cart_keyboard
 
@@ -71,22 +71,31 @@ async def show_carts(callback: Union[types.CallbackQuery, types.Message], **kwar
     number = 0
     sum_price = 0
     for i in cart:
+        print('000000')
+        print(i)
+
         number += 1
         product = get_product(i[2])
         sum = int(i[3])*int(product[0][7])
-        markup = buy_keyboard(item_id=i[0], cart_product_id=i[0], count=i[3], number_cart=number)
+        markup = buy_keyboard(item_id=i[2], cart_product_id=i[0], count=i[3], number_cart=number)
 
         sum_price += sum
         
         print(product)
         await bot.send_message(callback.from_user.id, f"{number}. {product[0][5]} - {i[3]}шт - {sum}p", reply_markup=markup)
-
-    await bot.send_message(callback.from_user.id, f"Ваш заказ на {sum_price}p")
+    h = await bot.send_message(callback.from_user.id, f"Ваш заказ на {sum_price}p")
+    # print(h)
+    global variable_for_show_cart
+    variable_for_show_cart = [h, sum_price]
+    print(variable_for_show_cart)
+    
+    await bot.send_message(callback.from_user.id, f"{callback.message_id}")
+    # print(callback.message_id)
 
     await bot.send_message(callback.from_user.id, 'Корзина, тадааам')
     print(callback.from_user.id)
 
-async def edit_cart(callback: types.CallbackQuery, category, subcategory, item_id, count, cart_product_id, number_cart):
+async def edit_cart(callback: types.CallbackQuery, category, subcategory, item_id, count, cart_product_id, number_cart, **kwargs):
     product = get_product(item_id)
     print(11111111111111111111111)
     print(cart_product_id)
@@ -95,7 +104,7 @@ async def edit_cart(callback: types.CallbackQuery, category, subcategory, item_i
     sum = int(count) * int(product[0][7])
     await callback.message.edit_text(f"{product[0][5]} - {product[0][7]}\n\n{count} шт - {sum}p", reply_markup=edit_cart_keyboard(cart_product_id, item_id, count, number_cart))
 
-async def rm_cart(callback: types.CallbackQuery, category, subcategory, item_id, count):
+async def rm_cart(callback: types.CallbackQuery, category, subcategory, item_id, count, **kwargs):
     # get_item(category_code=category, subcategory_code=subcategory, item_id=item_id)
     user_id = find_user_id(callback.from_user.id)
     print(user_id[0][0])
@@ -106,10 +115,29 @@ async def rm_cart(callback: types.CallbackQuery, category, subcategory, item_id,
     await callback.message.edit_text("Продукт удален")
 
 
-async def show_cart(callback: types.CallbackQuery, category, subcategory, item_id, count, number_cart):
-    print(item_id)
+async def show_cart(callback: types.CallbackQuery, category, subcategory, item_id, count, number_cart, cart_product_id, old_count):
+    print(item_id, cart_product_id)
+    print(3333333333333333)
+    print(variable_for_show_cart[0].message_id)
 
-    # await callback.message.edit_text(f"{number_cart}. {product[0][5]} - {i[3]}шт - {sum}p", reply_markup=markup)
+    product = get_product(item_id)
+    old_product_sum = int(old_count)*int(product[0][7])
+    new_product_sum = int(count)*int(product[0][7])
+
+    sum_price = int(variable_for_show_cart[1]) - int(old_product_sum) + int(new_product_sum) 
+    print(f" variable_for_show_cart  --  {int(variable_for_show_cart[1])}")
+    print(f" old_product_sum  --  {int(old_product_sum)}") 
+    print(f" new_product_sum  --  {int(new_product_sum)}")
+    print(f" old_count  --  {int(old_count)}")
+    print(f" count  --  {int(count)}")
+
+
+    markup = buy_keyboard(item_id, cart_product_id, count, number_cart)
+
+    await callback.message.edit_text(f"{number_cart}. {product[0][5]} - {count}шт - {new_product_sum}p", reply_markup=markup)
+    await bot.edit_message_text(f"Ваш заказ на {sum_price}p", variable_for_show_cart[0].chat.id, variable_for_show_cart[0].message_id )
+    edit_cart_product(cart_product_id, count)
+    # await bot.edit_message_text()
 
 
 
@@ -122,6 +150,7 @@ async def navigate(call: types.CallbackQuery, callback_data: dict):
     count = callback_data.get('count')
     cart_product_id = callback_data.get('cart_product_id')
     number_cart = callback_data.get('number_cart')
+    old_count = callback_data.get("old_count")
     print(f'5. {callback_data}')
 
 
@@ -146,6 +175,7 @@ async def navigate(call: types.CallbackQuery, callback_data: dict):
         item_id=item_id,
         count=count,
         cart_product_id=cart_product_id,
-        number_cart=number_cart
+        number_cart=number_cart,
+        old_count=old_count
     )
 

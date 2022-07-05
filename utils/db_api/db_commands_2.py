@@ -424,6 +424,35 @@ def get_cart_product(cart_id):
             connection.close()
             print('[INFO] PostgreSQL connection closed') 
 
+def edit_cart_product(cart_id, count):
+    try:
+        #connect to exist database
+        connection = psycopg2.connect(
+            host=host,
+            user=PGUSER,
+            password=PGPASSWORD,
+            database = DATABASE
+        )
+        connection.autocommit = True
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "update cart set product_count=%s where id=%s;", (count, str(cart_id),)
+            )
+            # print(cursor.fetchall())
+            # print(1)
+            return cursor.fetchall()
+            
+    except Exception as _ex:
+        print('[INFO] Error while working with PostgreSQL', _ex)
+
+    finally:
+        if connection:
+            connection.close()
+            print('[INFO] PostgreSQL connection closed') 
+
+
+
 # pizza = 'pizza'
 # vegan = 'vegan'
 # print(get_items(pizza, vegan))

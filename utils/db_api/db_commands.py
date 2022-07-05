@@ -1,40 +1,32 @@
-# from operator import and_, imod
-# from utils.db_api.database import db
-# from sqlalchemy import and_
-# from utils.db_api.models import Item
-# from typing import List
+import psycopg2
+from data.config import  PGUSER, PGPASSWORD, DATABASE
+import asyncio
+host = '127.0.0.1'
 
+class Database():
+    def __init__(self):
+        self.host=host,
+        self.user=PGUSER,
+        self.password=PGPASSWORD,
+        self.database = DATABASE
+  
+class Category(Database):
+    pass
 
-# async def add_item(**kworgs):
-#     newitem = await Item(**kworgs).create()
-#     return newitem
+class Subcategory(Database):
+    pass
 
-# async def get_categories() -> List[Item]:
-#     return await Item.query.distinct(Item.category_code).gino.all()
+class Product(Database):
+    pass
 
-# async def get_subcategories(category) -> List[Item]:
-#     return await Item.query.distinct(Item.subcategory_code).where(Item.category_code == category).gino.all()
+class Cart(Database):
+    pass
 
-# async def count_item(catrgory_code, subcatrgory_code = None):
-#     conditions = [Item.category_code == catrgory_code]
+class Cart_product(Database):
+    pass
 
-#     if subcatrgory_code:
-#         conditions.append(Item.subcategory_code == subcatrgory_code)
+class User(Database):
+    pass
 
-#     total = await db.select([db.func.count()]).where(
-#         and_(*conditions)
-#     ).gino.scaler()
-#     return total
-
-# async def get_items(catrgory_code, subcatrgory_code) -> List[Item]:
-#     items = await Item.query.where(
-#         and_(Item.category_code == catrgory_code,
-#         Item.subcategory_code == subcatrgory_code)
-#     ).gino.all()
-#     return items
-
-# async def get_item(item_id) -> Item:
-#     item = await Item.query.where(Item.id == item_id).gino.first()
-#     return item
-
-# print(get_categories())
+class Admin(Database):
+    pass

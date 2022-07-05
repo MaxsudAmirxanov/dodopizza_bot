@@ -5,11 +5,11 @@ from sqlalchemy import subquery
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from utils.db_api.db_commands_2 import get_all_database, get_subcategories, get_items, get_cart_product
 
-menu_cd = CallbackData("show_menu", "level", "category", "subcategory", "item_id", "count", "cart_product_id", "number_cart")
+menu_cd = CallbackData("show_menu", "level", "category", "subcategory", "item_id", "count", "cart_product_id", "number_cart", "old_count")
 buy_item = CallbackData("buy", "item_id")
 
-def make_callback_data(level, category='0', subcategory='0', item_id='0', count=1, cart_product_id='0', number_cart='0'):
-    return menu_cd.new(level=level, category=category, subcategory=subcategory, item_id=item_id, count=count, cart_product_id=cart_product_id)
+def make_callback_data(level, category='0', subcategory='0', item_id='0', count=1, cart_product_id='0', number_cart='0', old_count='0'):
+    return menu_cd.new(level=level, category=category, subcategory=subcategory, item_id=item_id, count=count, cart_product_id=cart_product_id, number_cart=number_cart, old_count=old_count)
 
 # def make_callback_buy_item(buy, item_id, count):
 #     return buy_item.new(buy=buy, item_id='0', count=1 )
@@ -123,17 +123,18 @@ def edit_cart_keyboard(cart_product_id, item_id, count, number_cart):
     CURRENT_LEVEL = 5
     print(cart_product_id)
     product = get_cart_product(cart_product_id)
-    print(f"_____________ {product}   {cart_product_id}")
+    print(f"_____________ {product}   {cart_product_id} {number_cart}")
     # count = product[0][3]
     print(count)
+    # print(old_count)
     markup = InlineKeyboardMarkup()
     markup.add(
-       InlineKeyboardButton(text="➕", callback_data=make_callback_data(level=CURRENT_LEVEL, cart_product_id=cart_product_id, item_id=item_id, count=int(count)+1)),
-       InlineKeyboardButton(text="➖", callback_data=make_callback_data(level=CURRENT_LEVEL, cart_product_id=cart_product_id, item_id=item_id, count=int(count)-1))
+       InlineKeyboardButton(text="➕", callback_data=make_callback_data(level=CURRENT_LEVEL, cart_product_id=cart_product_id, item_id=item_id, count=int(count)+1, number_cart=number_cart, old_count=product[0][3])),
+       InlineKeyboardButton(text="➖", callback_data=make_callback_data(level=CURRENT_LEVEL, cart_product_id=cart_product_id, item_id=item_id, count=int(count)-1, number_cart=number_cart, old_count=product[0][3]))
     )
 
     markup.row(
-        InlineKeyboardButton(text='Отмена', callback_data=make_callback_data(level=CURRENT_LEVEL -1, cart_product_id=cart_product_id, item_id=item_id, count=count, number_cart=number_cart)),
-        InlineKeyboardButton(text='Сохранить', callback_data=make_callback_data(level=CURRENT_LEVEL +2, cart_product_id=cart_product_id, item_id=item_id, count=count, number_cart=number_cart))
+        InlineKeyboardButton(text='Отмена', callback_data=make_callback_data(level=CURRENT_LEVEL -1, cart_product_id=cart_product_id, item_id=item_id, count=count, number_cart=number_cart, old_count=product[0][3])),
+        InlineKeyboardButton(text='Сохранить', callback_data=make_callback_data(level=CURRENT_LEVEL +2, cart_product_id=cart_product_id, item_id=item_id, count=count, number_cart=number_cart, old_count=product[0][3]))
     )
     return markup
