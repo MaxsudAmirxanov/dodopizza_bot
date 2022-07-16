@@ -4,7 +4,7 @@ from data.config import  PGUSER, PGPASSWORD, DATABASE
 import asyncio
 host = '127.0.0.1'
 
-def get_all_database():
+def get_all_database(): #get_category_name_distinct
     try:
         #connect to exist database
         connection = psycopg2.connect(
@@ -33,7 +33,7 @@ def get_all_database():
             connection.close()
             print('[INFO] PostgreSQL connection closed')  
 
-def get_categories():
+def get_categories(): #get_category_name
     try:
         #connect to exist database
         connection = psycopg2.connect(
@@ -62,7 +62,7 @@ def get_categories():
             connection.close()
             print('[INFO] PostgreSQL connection closed')  
 
-def get_subcategories(category_code):
+def get_subcategories(category_code): #get_subcategory_name
     try:
         #connect to exist database
         connection = psycopg2.connect(
@@ -91,7 +91,7 @@ def get_subcategories(category_code):
             connection.close()
             print('[INFO] PostgreSQL connection closed')  
 
-def get_items(category_code, subcategory_code):
+def get_items(category_code, subcategory_code): #get_product
     try:
         #connect to exist database
         connection = psycopg2.connect(
@@ -180,7 +180,7 @@ def add_item(name, category_code, category_name, subcategory_code, subcategory_n
             connection.close()
             print('[INFO] PostgreSQL connection closed')  
 
-def delete_user(id):
+def delete_user(id): #delete_customer
     try:
         #connect to exist database
         connection = psycopg2.connect(
@@ -207,7 +207,7 @@ def delete_user(id):
             connection.close()
             print('[INFO] PostgreSQL connection closed') 
 
-def add_to_cart(user_id, product_id, count):
+def add_to_cart(user_id, product_id, count): #add_to_cart
     try:
         #connect to exist database
         connection = psycopg2.connect(
@@ -262,7 +262,7 @@ def add_customer(name, last_name, user_name, user_id):
             connection.close()
             print('[INFO] PostgreSQL connection closed') 
 
-def read_user_id():
+def read_user_id(): #read_customer_id
     try:
         #connect to exist database
         connection = psycopg2.connect(
@@ -289,7 +289,7 @@ def read_user_id():
             connection.close()
             print('[INFO] PostgreSQL connection closed') 
 
-def find_user_id(id):
+def find_user_id(id): #find_customer_id
     try:
         #connect to exist database
         connection = psycopg2.connect(
@@ -316,7 +316,7 @@ def find_user_id(id):
             connection.close()
             print('[INFO] PostgreSQL connection closed') 
 
-def get_cart(user_id):
+def get_cart(user_id): #get_cart
     try:
         #connect to exist database
         connection = psycopg2.connect(
@@ -343,7 +343,7 @@ def get_cart(user_id):
             connection.close()
             print('[INFO] PostgreSQL connection closed') 
 
-def get_product(id):
+def get_product(id): #get_product
     try:
         #connect to exist database
         connection = psycopg2.connect(
@@ -370,7 +370,7 @@ def get_product(id):
             connection.close()
             print('[INFO] PostgreSQL connection closed') 
 
-def rm_cart_product(product_id, user_id):
+def rm_cart_product(product_id, user_id): #rm_cart_product
     try:
         #connect to exist database
         connection = psycopg2.connect(
@@ -397,7 +397,7 @@ def rm_cart_product(product_id, user_id):
             connection.close()
             print('[INFO] PostgreSQL connection closed') 
 
-def get_cart_product(cart_id):
+def get_cart_product(cart_id): #get_cart_product
     try:
         #connect to exist database
         connection = psycopg2.connect(

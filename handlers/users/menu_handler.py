@@ -7,8 +7,12 @@ import logging
 from typing import Union
 from loader import dp
 from utils.db_api.db_commands_2 import edit_cart_product, get_item, add_to_cart, read_user_id, get_cart, find_user_id, get_product, rm_cart_product, get_cart_product
-
+from utils.db_api.database import Cart, Product, Customer
 from keyboards.inline.menu_keyboards import categories_keyboard, items_keyboard, subcategories_keyboard, item_keyboard, menu_cd, buy_keyboard, edit_cart_keyboard
+
+product_db = Product()
+cart_db = Cart()
+customer_db = Customer()
 
 @dp.message_handler(text="🍴 Меню")
 async def show_menu(message: types.Message):
@@ -34,10 +38,10 @@ async def list_item(callback: types.CallbackQuery, category, subcategory, **kwar
     
     if kwargs["item_id"] != "0":
         print('add')
-        id = find_user_id(int(callback.from_user.id))
+        id = customer_db.find_customer_id(int(callback.from_user.id))
         print(f"-- {id}")
         # print(callback.from_user.id)
-        add_to_cart(user_id=id[0][0], product_id=kwargs["item_id"], count=kwargs["count"])
+        cart_db.add_to_cart(user_id=id[0][0], product_id=kwargs["item_id"], count=kwargs["count"])
         
 
     print(f"1.2 {category}")
@@ -48,7 +52,7 @@ async def list_item(callback: types.CallbackQuery, category, subcategory, **kwar
     await callback.message.edit_text("Смотри что у нас есть", reply_markup=markup)
 
 async def show_item(callback: types.CallbackQuery, category, subcategory, item_id, count, **kwargs):
-    item = get_item(category, subcategory, item_id)
+    item = product_db.customer_db(category, subcategory, item_id)
     print(f"1.3 {item}")
     markup = item_keyboard(category, subcategory, item_id, item[0][7], count)
 
@@ -62,8 +66,8 @@ async def show_item(callback: types.CallbackQuery, category, subcategory, item_i
 async def show_carts(callback: Union[types.CallbackQuery, types.Message], **kwargs):
     # count = callback_data.get('count')
 
-    id = find_user_id(int(callback.from_user.id))
-    cart = get_cart(id[0][0])
+    id = customer_db.find_customer_id(int(callback.from_user.id))
+    cart = cart_db.get_cart(id[0][0])
     print(cart)
     # print(callback)
     logging.info(f'{cart}')
@@ -75,7 +79,7 @@ async def show_carts(callback: Union[types.CallbackQuery, types.Message], **kwar
         print(i)
 
         number += 1
-        product = get_product(i[2])
+        product = product_db.get_product(i[2])
         sum = int(i[3])*int(product[0][7])
         markup = buy_keyboard(item_id=i[2], cart_product_id=i[0], count=i[3], number_cart=number)
 
@@ -83,6 +87,7 @@ async def show_carts(callback: Union[types.CallbackQuery, types.Message], **kwar
         
         print(product)
         await bot.send_message(callback.from_user.id, f"{number}. {product[0][5]} - {i[3]}шт - {sum}p", reply_markup=markup)
+    
     h = await bot.send_message(callback.from_user.id, f"Ваш заказ на {sum_price}p")
     # print(h)
     global variable_for_show_cart
@@ -96,7 +101,7 @@ async def show_carts(callback: Union[types.CallbackQuery, types.Message], **kwar
     print(callback.from_user.id)
 
 async def edit_cart(callback: types.CallbackQuery, category, subcategory, item_id, count, cart_product_id, number_cart, **kwargs):
-    product = get_product(item_id)
+    product = product_db.get_product(item_id)
     print(11111111111111111111111)
     print(cart_product_id)
     print(item_id)
@@ -106,11 +111,11 @@ async def edit_cart(callback: types.CallbackQuery, category, subcategory, item_i
 
 async def rm_cart(callback: types.CallbackQuery, category, subcategory, item_id, count, **kwargs):
     # get_item(category_code=category, subcategory_code=subcategory, item_id=item_id)
-    user_id = find_user_id(callback.from_user.id)
+    user_id = customer_db.find_customer_id(callback.from_user.id)
     print(user_id[0][0])
     print(count)
     print(item_id)
-    rm_cart_product(int(item_id), int(user_id[0][0]))
+    cart_db.rm_cart_product(int(item_id), int(user_id[0][0]))
 
     await callback.message.edit_text("Продукт удален")
 
@@ -120,7 +125,7 @@ async def show_cart(callback: types.CallbackQuery, category, subcategory, item_i
     print(3333333333333333)
     print(variable_for_show_cart[0].message_id)
 
-    product = get_product(item_id)
+    product = product_db.get_product(item_id)
     old_product_sum = int(old_count)*int(product[0][7])
     new_product_sum = int(count)*int(product[0][7])
 
@@ -136,7 +141,7 @@ async def show_cart(callback: types.CallbackQuery, category, subcategory, item_i
 
     await callback.message.edit_text(f"{number_cart}. {product[0][5]} - {count}шт - {new_product_sum}p", reply_markup=markup)
     await bot.edit_message_text(f"Ваш заказ на {sum_price}p", variable_for_show_cart[0].chat.id, variable_for_show_cart[0].message_id )
-    edit_cart_product(cart_product_id, count)
+    cart_db.edit_cart_product(cart_product_id, count)
     # await bot.edit_message_text()
 
 

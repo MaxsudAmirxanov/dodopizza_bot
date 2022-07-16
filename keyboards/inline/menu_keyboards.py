@@ -4,9 +4,15 @@ from sqlalchemy import subquery
 # from menu_keyboard import get_categories, count_item, get_subcategories, get_items
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from utils.db_api.db_commands_2 import get_all_database, get_subcategories, get_items, get_cart_product
+from utils.db_api.database import Product, Cart, Customer
+
 
 menu_cd = CallbackData("show_menu", "level", "category", "subcategory", "item_id", "count", "cart_product_id", "number_cart", "old_count")
 buy_item = CallbackData("buy", "item_id")
+
+product = Product()
+cart = Cart()
+customer = Customer()
 
 def make_callback_data(level, category='0', subcategory='0', item_id='0', count=1, cart_product_id='0', number_cart='0', old_count='0'):
     return menu_cd.new(level=level, category=category, subcategory=subcategory, item_id=item_id, count=count, cart_product_id=cart_product_id, number_cart=number_cart, old_count=old_count)
@@ -19,7 +25,7 @@ async def categories_keyboard():
     CURRENT_LEVEL = 0
     markup = InlineKeyboardMarkup(row_width=1)
 
-    catrgories = get_all_database()
+    catrgories = product.get_category_name_distinct()
     print(catrgories)
     
     for category in catrgories:
@@ -39,7 +45,7 @@ async def subcategories_keyboard(category):
     CURRENT_LEVEL = 1
     markup = InlineKeyboardMarkup()
 
-    subcategories = get_subcategories(category)
+    subcategories = product.get_subcategory_name(category)
     print(f'1. {subcategories}')
     print(category)
     for subcategory in subcategories:
@@ -62,7 +68,7 @@ async def items_keyboard(category, subcategory):
     CURRENT_LEVEL = 2
     markup = InlineKeyboardMarkup(row_width=1)
 
-    items = get_items(category, subcategory)
+    items = product.get_products(category, subcategory)
     print(f'2. {items}')
     for item in items:
         button_text = f"{item[5]} - {item[7]}р"
@@ -122,7 +128,7 @@ def edit_cart_keyboard(cart_product_id, item_id, count, number_cart):
 
     CURRENT_LEVEL = 5
     print(cart_product_id)
-    product = get_cart_product(cart_product_id)
+    product = cart.get_cart_product(cart_product_id)
     print(f"_____________ {product}   {cart_product_id} {number_cart}")
     # count = product[0][3]
     print(count)
