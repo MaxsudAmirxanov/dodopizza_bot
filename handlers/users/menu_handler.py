@@ -94,7 +94,7 @@ async def show_carts(callback: Union[types.CallbackQuery, types.Message], **kwar
     variable_for_show_cart = [h, sum_price]
     print(variable_for_show_cart)
     
-    await bot.send_message(callback.from_user.id, f"{callback.message_id}")
+    # await bot.send_message(callback.from_user.id, f"{callback.message_id}")
     # print(callback.message_id)
 
     await bot.send_message(callback.from_user.id, 'Корзина, тадааам')

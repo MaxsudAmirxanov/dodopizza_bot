@@ -1,9 +1,0 @@
-from aiogram import types
-from aiogram.dispatcher.filters.builtin import CommandStart
-from loader import bot
-
-from loader import dp
-
-@dp.message_handler(commands='admin', )
-async def admin(message: types.Message):
-    pass
