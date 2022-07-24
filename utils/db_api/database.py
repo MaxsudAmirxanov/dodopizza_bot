@@ -1,3 +1,4 @@
+
 import sqlite3
 
 
@@ -18,13 +19,72 @@ class Product():
                 return cursore.fetchall()
         except Exception as _ex:
             print(f'[SQLite] {_ex}')
-                
-    def test_product(self):
+
+    def get_product_photo(self, id):
         try:
             with sqlite3.connect('utils/db_api/database.db') as db:
                 cursore = db.cursor()
-                cursore.execute("UPDATE product SET photo='AgACAgIAAxkBAAILE2LXAriaTOYQ-2o_vw4D0iWtabOoAAIYwTEbecq' WHERE id=1")
-                # cursore.execute('select * from product;')
+                cursore.execute("SELECT photo FROM product where id=?;", (id,))
+
+                db.commit()
+                return cursore.fetchall()
+        except Exception as _ex:
+            print(f'[SQLite] {_ex}')
+            return False
+
+    def edit_product_name(self, id, name):
+        try:
+            with sqlite3.connect('utils/db_api/database.db') as db:
+                cursore = db.cursor()
+                cursore.execute("UPDATE product SET name=? WHERE id=?;", (name, id))
+
+                db.commit()
+                return cursore.fetchall()
+        except Exception as _ex:
+            print(f'[SQLite] {_ex}')
+            return False
+
+    def edit_product_price(self, id, price):
+        try:
+            with sqlite3.connect('utils/db_api/database.db') as db:
+                cursore = db.cursor()
+                cursore.execute("UPDATE product SET price=? WHERE id=?;", (price, id))
+
+                db.commit()
+                return cursore.fetchall()
+        except Exception as _ex:
+            print(f'[SQLite] {_ex}')
+            return False
+
+    def edit_product_photo(self, id, photo_id):
+        try:
+            with sqlite3.connect('utils/db_api/database.db') as db:
+                cursore = db.cursor()
+                cursore.execute("UPDATE product SET photo=? WHERE id=?;", (photo_id, id))
+
+                db.commit()
+                return cursore.fetchall()
+        except Exception as _ex:
+            print(f'[SQLite] {_ex}')
+            return False
+
+    def delete_product(self, id):
+        try:
+            with sqlite3.connect('utils/db_api/database.db') as db:
+                cursore = db.cursor()
+                cursore.execute("DELETE FROM product where id=?;", (id,))
+
+                db.commit()
+                return True
+        except Exception as _ex:
+            print(f'[SQLite] {_ex}')
+            return False
+
+    def show_products(self):
+        try:
+            with sqlite3.connect('utils/db_api/database.db') as db:
+                cursore = db.cursor()
+                cursore.execute("SELECT * FROM product;")
 
                 db.commit()
                 return cursore.fetchall()
@@ -335,6 +395,6 @@ def test_product():
     except Exception as _ex:
         print(f'[SQLite] {_ex}') 
         
-print(test_product())
+# print(test_product())
 # print(admin.chek_admin(91510596))
 

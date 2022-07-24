@@ -8,7 +8,11 @@ from loader import dp
 array = ['Добро пожаловать Админ',
         'Вот доступные комманды',
         '/block_user',
-        '/unblock_user']
+        '/unblock_user',
+        '/show_products',
+        '/show_users',
+        '/change_product'
+        ]
 @dp.message_handler(IsAdmin(), commands='admin')
 async def admin(message: types.Message):
     # await message.answer(
