@@ -1,3 +1,4 @@
+
 from os import stat
 from aiogram import types
 from aiogram.utils.callback_data import CallbackData
@@ -19,12 +20,16 @@ from loader import bot
 from loader import dp
 
 
-class ChangeProduct(StatesGroup):
+class AddProduct(StatesGroup):
     # category_name = State()
     # cstegory_code = State()
     # subcategory_name = State()
     # subcatgory_code = State()
-    item_id = State
+    item_id = State()
+    category_name = State()
+    category_code = State()
+    subcategory_name = State()
+    subcategory_code = State()
     name = State()
     photo = State()
     price = State()
@@ -33,13 +38,13 @@ class ChangeProduct(StatesGroup):
 
 
 
-from keyboards.inline.change_product_keyboards import categories_keyboard, items_keyboard, subcategories_keyboard, item_keyboard, menu_cd, buy_keyboard, edit_cart_keyboard
+from keyboards.inline.add_product_keyboard import categories_keyboard, subcategories_keyboard, menu_cd
 
 product_db = Product()
 cart_db = Cart()
 customer_db = Customer()
 
-@dp.message_handler(commands='change_product')
+@dp.message_handler(IsAdmin(), commands='add_product')
 async def show_menu(message: types.Message):
     await list_categories(message)
 
@@ -48,7 +53,7 @@ async def list_categories(message: Union[types.Message, types.CallbackGame], **k
 
     if isinstance(message, types.Message):
         # p_3 = open('photo_3.png', 'rb')
-        await message.answer("Выберите категорию товара, которую хотите изменить", reply_markup=markup)
+        await message.answer("Выберите категорию товара, в которую хотите добавить товар", reply_markup=markup)
         
 
     elif isinstance(message, types.CallbackQuery):
@@ -58,140 +63,82 @@ async def list_categories(message: Union[types.Message, types.CallbackGame], **k
 async def list_subcategoies(callback: types.CallbackQuery, category, **kwargs):
     # print(f"1.1 {category}")
     markup = await subcategories_keyboard(category)
-    await callback.message.edit_reply_markup(markup)
+    # await callback.message.edit_reply_markup(markup)
+    await callback.message.edit_text('Выберите подкатегорию товара, в которую хотите добавить товар', reply_markup=markup)
 
-async def list_item(callback: types.CallbackQuery, category, subcategory, **kwargs):
-    
-    if kwargs["item_id"] != "0":
-        # print('add')
-        id = customer_db.find_customer_id(int(callback.from_user.id))
-        print(f"-- {id}")
-        # print(callback.from_user.id)
-        cart_db.add_to_cart(user_id=id[0][0], product_id=kwargs["item_id"], count=kwargs["count"])
-        
+async def add_new_product(callback: types.CallbackQuery, category, subcategory, **kwargs):
+    # print(f"1.1 {category}")
+    # markup = await subcategories_keyboard(category)
+    # await callback.message.edit_reply_markup(markup)
+    # await callback.message.edit_text('Выберите подкатегорию товара, в которую хотите добавить товар', reply_markup=markup)
 
-    print(f"1.2 {category} -- {kwargs}")
-    print(kwargs)
-    print(subcategory)
-    markup = await items_keyboard(category=category, subcategory=subcategory)
-    
-    await callback.message.edit_text("Смотри что у нас есть", reply_markup=markup)
-    # if kwargs['old_count'] == 'назад':
-    #     await callback.message.delete_chat_photo(media=InputMediaPhoto(media=open('image.jpg', 'rb')))
-#         message.edit_media(
-#     media=InputMediaPhoto(
-#         media=open('image.jpg', 'rb'),
-#         caption='Title'
-#     )
-# )
+    product_category = product_db.get_distinct_category_name(category_code=category)
+    product_subcategory = product_db.get_distinct_subcategory_name(category_code=category, subcategory_code=subcategory)
 
-async def show_item(callback: types.CallbackQuery, category, subcategory, item_id, **kwargs):
-    item = product_db.customer_db(category, subcategory, item_id)
-    print(f"1.3 {item}")
 
-    markup = item_keyboard(category, subcategory, item_id, item[0][7])
-
-    
-    print(item)
-    print('111--------------------')
-    # text = f"{item[0][5]} - {item[0][7]}р"
-    text = 'Выберите что хотите изменить'
-    # await callback.message.edit_text(text, reply_markup=markup)
-
-    # media = [types.InputMediaPhoto('data/photo/product.jpg')]  # Показываем, где фото и как её подписать
-    # media.append(types.InputMediaPhoto('data/photo/product.jpg'))
-    # 'AgACAgIAAxkBAAILNmLXCk8MgXBCVD8dhMvJ0-C0cKbVAAInwTEbecq5SpyUf8oj6tUhAQADAgADcwADKQQ'
-    # video_bytes = InputFile(path_or_bytesio='data/photo/product.jpeg')
-    
-    # await callback.message.edit_media()
-    # callback.message.edit_media()
-    await callback.message.edit_text(text, reply_markup=markup)
-    
-
-# @dp.message_handler(text='🛒 Корзина')
-# @dp.message_handler(state = '*')
-async def edit_name(callback: types.CallbackQuery, item_id, **kwargs):
-    # await callback.message.answer(f'{kwargs}')
-    
-    product = product_db.get_product(item_id)
-    await callback.message.answer(f'Ведите новое название, для товара {product[0][5]}')
-    # state= FSMContext(dp, callback.message.chat.id, )
     cur_state = dp.current_state()
     async with cur_state.proxy() as data:
-        data['item_id'] = item_id
-    await ChangeProduct.name.set()
+        data['category_code'] = category
+        data['subcategory_code'] = subcategory
+        data['category_name'] = product_category[0][0]
+        data['subcategory_name'] = product_subcategory[0][0]
 
-@dp.message_handler(state=ChangeProduct.name)
-async def name(message: types.Message, state: FSMContext, **kwargs):
-    data = await state.get_data()
-    item_id = data.get('item_id')
+    await callback.message.answer(f'Введите название товара, которую вы хотите добавить в подкатегорию  {product_subcategory[0][0]}')
 
-    await message.answer(f'{item_id}')
-    product = product_db.get_product(item_id)
+    await AddProduct.name.set()
+
+@dp.message_handler(state=AddProduct.name)
+async def price(message: types.Message, **kwargs):
     new_name = message.text
 
-    product_db.edit_product_name(item_id, new_name)
-    await message.answer(f'Имя товара с {product[0][5]} переименовано на {new_name}')
-
-    await state.finish()
-
-
-
-async def edit_price(callback: types.CallbackQuery, item_id, **kwargs):
-    # await callback.message.answer(f'{kwargs}')
-    
-    product = product_db.get_product(item_id)
-    await callback.message.answer(f'Ведите новый ценик, для товара {product[0][5]}')
-    # state= FSMContext(dp, callback.message.chat.id, )
     cur_state = dp.current_state()
     async with cur_state.proxy() as data:
-        data['item_id'] = item_id
-    await ChangeProduct.price.set()
+        data['name'] = new_name
 
-@dp.message_handler(state=ChangeProduct.price)
-async def price(message: types.Message, state: FSMContext, **kwargs):
-    data = await state.get_data()
-    item_id = data.get('item_id')
+    await message.answer(f'Введите цену для товара {new_name}')
 
-    await message.answer(f'{item_id}')
-    product = product_db.get_product(item_id)
+    await AddProduct.price.set()
+
+@dp.message_handler(state=AddProduct.price)
+async def price(message: types.Message, **kwargs):
     new_price = message.text
 
-    product_db.edit_product_price(item_id, new_price)
-    await message.answer(f'Цена товара с {product[0][7]} изменино на {new_price}')
-
-    await state.finish()
-    
-
-
-async def edit_photo(callback: types.CallbackQuery, item_id, **kwargs):
-    # await callback.message.answer(f'{kwargs}')
-    
-    product = product_db.get_product(item_id)
-    await callback.message.answer(
-        f'Отправть новую фотографию, для товара {product[0][5]}'
-        )
-    # state= FSMContext(dp, callback.message.chat.id, )
     cur_state = dp.current_state()
     async with cur_state.proxy() as data:
-        data['item_id'] = item_id
-    await ChangeProduct.photo.set()
+        data['price'] = new_price
 
-@dp.message_handler(state=ChangeProduct.photo, content_types=types.ContentTypes.PHOTO)
-async def photo(message: types.Message, state: FSMContext, **kwargs):
+    data = await cur_state.get_data()
+    product_name = data.get('name')
+    await message.answer(f'Отправть фотографию, для товара {product_name}')
 
-    data = await state.get_data()
-    item_id = data.get('item_id')
+    await AddProduct.photo.set()
+
+@dp.message_handler(state=AddProduct.photo, content_types=types.ContentTypes.PHOTO)
+async def price(message: types.Message, **kwargs):
+    product_photo = message.photo[0].file_id
     
 
-    product = product_db.get_product(item_id)
-    new_price = message.text
+    cur_state = dp.current_state()
+    async with cur_state.proxy() as data:
+        data['photo'] = product_photo
 
-    product_db.edit_product_photo(item_id, f'{message.photo[0].file_id}')
-    await message.answer(f'Фотография товара изменина')
+    data = await cur_state.get_data()
+    product_name = data.get('name')
+    product_price = data.get('price')
+    product_category = data['category_name']
+    product_category_code = data['category_code']
+    product_subcategory = data['subcategory_name']
+    product_subcategory_code = data['subcategory_code']
+    
+    await message.answer(f'{product_name} {product_price} {product_photo} {product_category} {product_category_code} {product_subcategory} {product_subcategory_code}')
 
-    await state.finish()
+    product_db.add_product(name=product_name, category_code=data.get('category_code'), category_name=data.get('category_name'),\
+                                 subcategory_code=data.get('subcategory_code'), subcategory_name=data.get('subcategory_name'), \
+                                    photo=product_photo, price=product_price)
 
+    await message.answer(f'Добавлен новый товар {product_name}')
+
+    await cur_state.finish()
 
 @dp.callback_query_handler(menu_cd.filter())
 async def navigate(call: types.CallbackQuery, callback_data: dict):
@@ -208,8 +155,8 @@ async def navigate(call: types.CallbackQuery, callback_data: dict):
 
     levels = {
         "0": list_categories,
-        "1": list_subcategoies
-        # "2": list_item,
+        "1": list_subcategoies,
+        "2": add_new_product
         # "3": show_item,
         # "4": edit_name,
         # '5': edit_price,

@@ -7,7 +7,7 @@ from utils.db_api.db_commands_2 import get_all_database, get_subcategories, get_
 from utils.db_api.database import Product, Cart, Customer
 
 
-menu_cd = CallbackData("show_menu_add", "level", "category", "subcategory", "item_id", "name", "photo", "price")
+menu_cd = CallbackData("delete_category", "level", "category", "subcategory", "item_id", "name", "photo", "price")
 buy_item = CallbackData("buy", "item_id")
 
 product_db = Product()
@@ -32,7 +32,7 @@ async def categories_keyboard():
         
         button_text = f"{category[0]}"
         callback_data = make_callback_data_add(level=CURRENT_LEVEL + 1, category=category[1])
-        print(f'0. {callback_data}')
+        # print(f'0. {callback_data}')
 
         markup.insert(
             InlineKeyboardButton(text=button_text, callback_data=callback_data)

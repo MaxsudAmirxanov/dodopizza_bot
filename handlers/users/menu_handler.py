@@ -144,11 +144,25 @@ async def edit_cart(callback: types.CallbackQuery, category, subcategory, item_i
 async def rm_cart(callback: types.CallbackQuery, category, subcategory, item_id, count, **kwargs):
     # get_item(category_code=category, subcategory_code=subcategory, item_id=item_id)
     user_id = customer_db.find_customer_id(callback.from_user.id)
+    print('Удаление продукта')
     print(user_id[0][0])
     print(count)
     print(item_id)
-    cart_db.rm_cart_product(int(item_id), int(user_id[0][0]))
+    i = cart_db.rm_cart_product(int(item_id), int(user_id[0][0]))
+    # await callback.message.edit_text(f"Ваш заказ на {variable_for_show_cart[1]}p")
 
+    id = customer_db.find_customer_id(int(callback.from_user.id))
+    cart = cart_db.get_cart(id[0][0])
+
+    sum_price = 0
+    for i in cart:
+        product = product_db.get_product(i[2])
+        sum = int(i[3])*int(product[0][7])
+        
+
+        sum_price += sum
+    await bot.edit_message_text(f"Ваш заказ на {sum_price}p", variable_for_show_cart[0].chat.id, variable_for_show_cart[0].message_id )
+    print(i)
     await callback.message.edit_text("Продукт удален")
 
 

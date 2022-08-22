@@ -22,4 +22,4 @@ async def admin(message: types.Message):
         array.append(f'{i[0]}   {i[1]}   {i[3]}   {i[6]}   {i[7]}')
     await message.answer('\n'.join(array))
    
-    await message.answer('мяу хуяу')
+

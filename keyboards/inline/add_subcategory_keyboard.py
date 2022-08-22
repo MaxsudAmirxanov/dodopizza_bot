@@ -7,7 +7,7 @@ from utils.db_api.db_commands_2 import get_all_database, get_subcategories, get_
 from utils.db_api.database import Product, Cart, Customer
 
 
-menu_cd = CallbackData("show_menu_add", "level", "category", "subcategory", "item_id", "name", "photo", "price")
+menu_cd = CallbackData("subcategory_add", "level", "category", "subcategory", "item_id", "name", "photo", "price")
 buy_item = CallbackData("buy", "item_id")
 
 product_db = Product()
@@ -40,27 +40,27 @@ async def categories_keyboard():
     return markup
 
 
-async def subcategories_keyboard(category):
+# async def subcategories_keyboard(category):
 
-    CURRENT_LEVEL = 1
-    markup = InlineKeyboardMarkup()
+#     CURRENT_LEVEL = 1
+#     markup = InlineKeyboardMarkup()
 
-    subcategories = product_db.get_subcategory_name(category)
-    # print(f'1. {subcategories}')
-    print(category)
-    for subcategory in subcategories:
+#     subcategories = product_db.get_subcategory_name(category)
+#     # print(f'1. {subcategories}')
+#     print(category)
+#     for subcategory in subcategories:
 
-        button_text = f"{subcategory[0]}"
-        callback_data = make_callback_data_add(level=CURRENT_LEVEL + 1, category=category,subcategory=subcategory[1])
-        print(callback_data)
+#         button_text = f"{subcategory[0]}"
+#         callback_data = make_callback_data_add(level=CURRENT_LEVEL + 1, category=category,subcategory=subcategory[1])
+#         print(callback_data)
 
 
-        markup.insert(
-            InlineKeyboardButton(text=button_text, callback_data=callback_data)
-        )
+#         markup.insert(
+#             InlineKeyboardButton(text=button_text, callback_data=callback_data)
+#         )
 
-    markup.row(
-        InlineKeyboardButton(text='Назад', callback_data=make_callback_data_add(level=CURRENT_LEVEL - 1))
-    )
-    return markup
+#     markup.row(
+#         InlineKeyboardButton(text='Назад', callback_data=make_callback_data_add(level=CURRENT_LEVEL - 1))
+#     )
+#     return markup
 

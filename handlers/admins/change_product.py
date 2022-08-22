@@ -33,13 +33,13 @@ class ChangeProduct(StatesGroup):
 
 
 
-from keyboards.inline.change_product_keyboards import categories_keyboard, items_keyboard, subcategories_keyboard, item_keyboard, menu_cd, buy_keyboard, edit_cart_keyboard
+from keyboards.inline.change_product_keyboards import categories_keyboard, items_keyboard, subcategories_keyboard, item_keyboard, menu_cd
 
 product_db = Product()
 cart_db = Cart()
 customer_db = Customer()
 
-@dp.message_handler(commands='change_product')
+@dp.message_handler(IsAdmin(), commands='change_product')
 async def show_menu(message: types.Message):
     await list_categories(message)
 
@@ -58,7 +58,7 @@ async def list_categories(message: Union[types.Message, types.CallbackGame], **k
 async def list_subcategoies(callback: types.CallbackQuery, category, **kwargs):
     # print(f"1.1 {category}")
     markup = await subcategories_keyboard(category)
-    await callback.message.edit_reply_markup(markup)
+    await callback.message.edit_text("Выберите подкатегорию товара, которую хотите изменить",reply_markup= markup)
 
 async def list_item(callback: types.CallbackQuery, category, subcategory, **kwargs):
     

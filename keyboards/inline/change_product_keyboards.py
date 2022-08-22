@@ -7,14 +7,14 @@ from utils.db_api.db_commands_2 import get_all_database, get_subcategories, get_
 from utils.db_api.database import Product, Cart, Customer
 
 
-menu_cd = CallbackData("show_menu_add", "level", "category", "subcategory", "item_id", "name", "photo", "price")
+menu_cd = CallbackData("show_menu_cahange", "level", "category", "subcategory", "item_id", "name", "photo", "price")
 buy_item = CallbackData("buy", "item_id")
 
 product_db = Product()
 cart_db = Cart()
 customer_db = Customer()
 
-def make_callback_data_add(level, category='0', subcategory='0', item_id='0', name='0', photo='0', price='0'):
+def make_callback_data_change(level, category='0', subcategory='0', item_id='0', name='0', photo='0', price='0'):
     return menu_cd.new(level=level, category=category, subcategory=subcategory, item_id=item_id, name=name, photo=photo, price=price)
 
 # def make_callback_buy_item(buy, item_id, count):
@@ -31,7 +31,7 @@ async def categories_keyboard():
     for category in catrgories:
         
         button_text = f"{category[0]}"
-        callback_data = make_callback_data_add(level=CURRENT_LEVEL + 1, category=category[1])
+        callback_data = make_callback_data_change(level=CURRENT_LEVEL + 1, category=category[1])
         print(f'0. {callback_data}')
 
         markup.insert(
@@ -51,7 +51,7 @@ async def subcategories_keyboard(category):
     for subcategory in subcategories:
 
         button_text = f"{subcategory[0]}"
-        callback_data = make_callback_data_add(level=CURRENT_LEVEL + 1, category=category,subcategory=subcategory[1])
+        callback_data = make_callback_data_change(level=CURRENT_LEVEL + 1, category=category,subcategory=subcategory[1])
         print(callback_data)
 
 
@@ -60,7 +60,7 @@ async def subcategories_keyboard(category):
         )
 
     markup.row(
-        InlineKeyboardButton(text='Назад', callback_data=make_callback_data_add(level=CURRENT_LEVEL - 1))
+        InlineKeyboardButton(text='Назад', callback_data=make_callback_data_change(level=CURRENT_LEVEL - 1))
     )
     return markup
 
@@ -72,7 +72,7 @@ async def items_keyboard(category, subcategory):
     print(f'2. {items}')
     for item in items:
         button_text = f"{item[5]} - {item[7]}р"
-        callback_data = make_callback_data_add(level=CURRENT_LEVEL + 1, category=category, subcategory=subcategory, item_id=item[0])
+        callback_data = make_callback_data_change(level=CURRENT_LEVEL + 1, category=category, subcategory=subcategory, item_id=item[0])
 
         markup.insert(
             InlineKeyboardButton(text=button_text, callback_data=callback_data)
@@ -80,7 +80,7 @@ async def items_keyboard(category, subcategory):
 
     markup.row(
         InlineKeyboardButton(text='Назад', 
-        callback_data=make_callback_data_add(level=CURRENT_LEVEL - 1, 
+        callback_data=make_callback_data_change(level=CURRENT_LEVEL - 1, 
         category=category)
         )
     )
@@ -94,21 +94,21 @@ def item_keyboard(category, subcategory, item_id, price):
     CURRENT_LEVEL = 3
     markup = InlineKeyboardMarkup()
     markup.add(
-       InlineKeyboardButton(text=f"{product[0][5]}", callback_data=make_callback_data_add(level=CURRENT_LEVEL +1, category=category, subcategory=subcategory, item_id=item_id)),
-       InlineKeyboardButton(text=f"{product[0][7]}", callback_data=make_callback_data_add(level=CURRENT_LEVEL +2, category=category, subcategory=subcategory, item_id=item_id)),
-       InlineKeyboardButton(text=f"Фото", callback_data=make_callback_data_add(level=CURRENT_LEVEL +3, category=category, subcategory=subcategory, item_id=item_id))
+       InlineKeyboardButton(text=f"{product[0][5]}", callback_data=make_callback_data_change(level=CURRENT_LEVEL +1, category=category, subcategory=subcategory, item_id=item_id)),
+       InlineKeyboardButton(text=f"{product[0][7]}", callback_data=make_callback_data_change(level=CURRENT_LEVEL +2, category=category, subcategory=subcategory, item_id=item_id)),
+       InlineKeyboardButton(text=f"Фото", callback_data=make_callback_data_change(level=CURRENT_LEVEL +3, category=category, subcategory=subcategory, item_id=item_id))
     )
 
     # markup.row(
-    #    InlineKeyboardButton(text=f"✅ Добавить {count}шт - {sum}р", callback_data=make_callback_data_add(level=CURRENT_LEVEL -1, category=category, subcategory=subcategory, item_id=item_id, count=int(count)))
+    #    InlineKeyboardButton(text=f"✅ Добавить {count}шт - {sum}р", callback_data=make_callback_data_change(level=CURRENT_LEVEL -1, category=category, subcategory=subcategory, item_id=item_id, count=int(count)))
     # )
 
     markup.row(
         InlineKeyboardButton(text='Назад', 
-        callback_data=make_callback_data_add(level=CURRENT_LEVEL - 1, 
+        callback_data=make_callback_data_change(level=CURRENT_LEVEL - 1, 
         category=category, subcategory=subcategory)
         )
-        # InlineKeyboardButton(text="Корзина", callback_data=make_callback_data_add(level=CURRENT_LEVEL +1, category=category, subcategory=subcategory, item_id=item_id))
+        # InlineKeyboardButton(text="Корзина", callback_data=make_callback_data_change(level=CURRENT_LEVEL +1, category=category, subcategory=subcategory, item_id=item_id))
     )
     return markup
 

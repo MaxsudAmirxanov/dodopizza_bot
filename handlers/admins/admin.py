@@ -11,10 +11,14 @@ array = ['Добро пожаловать Админ',
         '/unblock_user',
         '/show_products',
         '/show_users',
-        '/change_product'
+        '/show_admin'
+        '/change_product',
+        '/add_admin'
+        '/add_product'
+
         ]
 @dp.message_handler(IsAdmin(), commands='admin')
-async def admin(message: types.Message):
+async def admin_command(message: types.Message):
     # await message.answer(
     #     'Добро пожаловать Админ\n\n'
     #     'Вот доступные комманды\n'

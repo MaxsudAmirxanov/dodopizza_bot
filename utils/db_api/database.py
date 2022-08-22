@@ -68,6 +68,43 @@ class Product():
             print(f'[SQLite] {_ex}')
             return False
 
+    def get_distinct_category_name(self, category_code):
+        try:
+            with sqlite3.connect('utils/db_api/database.db') as db:
+                cursore = db.cursor()
+                cursore.execute("SELECT distinct category_name FROM product WHERE category_code=?;", (category_code,))
+
+                db.commit()
+                return cursore.fetchall()
+        except Exception as _ex:
+            print(f'[SQLite] {_ex}')
+            return False
+
+    def get_distinct_subcategory_name(self, category_code, subcategory_code):
+        try:
+            with sqlite3.connect('utils/db_api/database.db') as db:
+                cursore = db.cursor()
+                cursore.execute("SELECT distinct subcategory_name FROM product WHERE category_code=? AND subcategory_code=?;", (category_code, subcategory_code))
+
+                db.commit()
+                return cursore.fetchall()
+        except Exception as _ex:
+            print(f'[SQLite] {_ex}')
+            return False
+
+    def distinct_subcategory_name(self, category):
+        try:
+            with sqlite3.connect('utils/db_api/database.db') as db:
+                cursore = db.cursor()
+                cursore.execute("SELECT distinct subcategory_name FROM product WHERE category_code=?;", (category,))
+
+                db.commit()
+                return cursore.fetchall()
+        except Exception as _ex:
+            print(f'[SQLite] {_ex}')
+            return False
+
+
     def delete_product(self, id):
         try:
             with sqlite3.connect('utils/db_api/database.db') as db:
@@ -103,6 +140,7 @@ class Product():
             print(f'[SQLite] {_ex}')
     
     def get_subcategory_name(self, category_code):
+
         try:
             with sqlite3.connect('utils/db_api/database.db') as db:
                 cursore = db.cursor()
@@ -117,7 +155,7 @@ class Product():
         try:
             with sqlite3.connect('utils/db_api/database.db') as db:
                 cursore = db.cursor()
-                cursore.execute("select * from product where subcategory_code=? and category_code=?; ", (subcategory_code, category_code))
+                cursore.execute("SELECT * from product where subcategory_code=? and category_code=?; ", (subcategory_code, category_code))
 
                 db.commit()
                 return cursore.fetchall() 
@@ -135,7 +173,6 @@ class Product():
         except Exception as _ex:
             print(f'[SQLite] {_ex}')
 
-
     def add_product(self, name, category_code, category_name, subcategory_code, subcategory_name, photo, price):
         try:
             with sqlite3.connect('utils/db_api/database.db') as db:
@@ -147,6 +184,30 @@ class Product():
         except Exception as _ex:
             print(f'[SQLite] {_ex}')
 
+    def add_category(self, catrgory_name, category_code):
+        try:
+            with sqlite3.connect('utils/db_api/database.db') as db:
+                cursore = db.cursor()
+                cursore.execute("insert into product(category_name, category_code, subcategory_name, subcategory_code, name, photo, price) values (?, ?, '-', '-', '-', '-', '-');", (catrgory_name, category_code))
+
+                db.commit()
+                return cursore.fetchall()
+        except Exception as _ex:
+            print(f'[SQLite] {_ex}')
+            return False
+
+    def add_subcategory(self, category_name, category_code, subcategory_name, subcategory_code):
+        try:
+            with sqlite3.connect('utils/db_api/database.db') as db:
+                cursore = db.cursor()
+                cursore.execute("INSERT INTO product(category_name, category_code, subcategory_name, subcategory_code, name, photo, price) values (?, ?, ?, ?, '-', '-', '-');", (category_name, category_code, subcategory_name, subcategory_code))
+
+                db.commit()
+                return cursore.fetchall()
+        except Exception as _ex:
+            print(f'[SQLite] {_ex}')
+            return False
+
     def get_product(self, id):
         try:
             with sqlite3.connect('utils/db_api/database.db') as db:
@@ -157,6 +218,44 @@ class Product():
                 return cursore.fetchall()
         except Exception as _ex:
             print(f'[SQLite] {_ex}')
+
+    def delete_category(self, catrgory_name):
+        try:
+            with sqlite3.connect('utils/db_api/database.db') as db:
+                cursore = db.cursor()
+                cursore.execute("DELETE FROM product where category_name=?", (catrgory_name[0][0],))
+
+                db.commit()
+                return cursore.fetchall()
+        except Exception as _ex:
+            print(f'[SQLite] {_ex}')
+            return False
+
+    def delete_subcategory(self, catrgory_name, subcategory_name):
+        try:
+            with sqlite3.connect('utils/db_api/database.db') as db:
+                cursore = db.cursor()
+                cursore.execute("DELETE FROM product where category_name=? and subcategory_name=?", (catrgory_name[0][0], subcategory_name[0][0]))
+
+                db.commit()
+                return cursore.fetchall()
+        except Exception as _ex:
+            print(f'[SQLite] {_ex}')
+            return False
+
+    def fined_category_name(self, catrgory_code):
+        try:
+            with sqlite3.connect('utils/db_api/database.db') as db:
+                cursore = db.cursor()
+                cursore.execute("SELECT distinct category_name FROM product whete category_code=?", (catrgory_code,))
+
+                db.commit()
+                return cursore.fetchall()
+        except Exception as _ex:
+            print(f'[SQLite] {_ex}')
+            return False
+
+
 class Cart():
     def add_to_cart(self, user_id, product_id, count):
         try:
@@ -185,12 +284,14 @@ class Cart():
         try:
             with sqlite3.connect('utils/db_api/database.db') as db:
                 cursore = db.cursor()
-                cursore.execute("delete from cart where user_id=? and id=?;", (user_id, product_id))
+                cursore.execute("DELETE from cart where user_id=? and product_id=?;", (user_id, product_id))
 
                 db.commit()
-                return cursore.fetchall()
+                # return cursore.fetchall()
+                return True
         except Exception as _ex:
             print(f'[SQLite] {_ex}')
+            return False
 
     def get_cart_product(self, cart_id):
         try:
@@ -213,6 +314,8 @@ class Cart():
                 return cursore.fetchall()
         except Exception as _ex:
             print(f'[SQLite] {_ex}')
+
+
 class Customer():   
     def delete_customer(self, id):
         try:
@@ -271,6 +374,9 @@ class Customer():
                 return cursore.fetchall()
         except Exception as _ex:
             print(f'[SQLite] {_ex}')
+            return False
+
+
 class Referrer():
     def add_referrer(self, user_id, id):
         try:
@@ -305,6 +411,8 @@ class Referrer():
                 return cursore.fetchall()
         except Exception as _ex:
             print(f'[SQLite] {_ex}')
+
+
 class Referral():
     def add_referral(self, referrer_id, refferal_telegram_id):
         try:
@@ -316,6 +424,8 @@ class Referral():
                 return cursore.fetchall()
         except Exception as _ex:
             print(f'[SQLite] {_ex}')
+
+
 class Admin():
     def chek_block_customer(self,  id):
         try:
@@ -330,7 +440,6 @@ class Admin():
         except Exception as _ex:
             print(f'[SQLite] {_ex}') 
             
-
     def blocked_customer(self, id):
         try:
             with sqlite3.connect('utils/db_api/database.db') as db:
@@ -372,29 +481,94 @@ class Admin():
         except Exception as _ex:
             print(f'[SQLite] {_ex}')
 
-    def add_admin():
-        pass
+    def show_admin(self):
+        
+        try:
+            with sqlite3.connect('utils/db_api/database.db') as db:
+                cursore = db.cursor()
+                cursore.execute('select a.*, c.name, c.last_name, c.user_id from admin a left join customer c on  a.customer_id=c.id;')
+                # cursore.execute('select * from admin;')
 
-    def delete_admin():
-        pass
+                db.commit()
+                return cursore.fetchall()
+        except Exception as _ex:
+            print(f'[SQLite] {_ex}')
+
+class MainAdmin():
+    def chek_main_admin(self, id):
+        
+        try:
+            with sqlite3.connect('utils/db_api/database.db') as db:
+                cursore = db.cursor()
+                cursore.execute('select * from main_admin where user_telegram_id=?;', (int(id),))
+                # cursore.execute('select * from admin;')
+
+                db.commit()
+                return cursore.fetchall()
+        except Exception as _ex:
+            print(f'[SQLite] {_ex}')
+
+    def get_admin_name(self, id):
+        
+        try:
+            with sqlite3.connect('utils/db_api/database.db') as db:
+                cursore = db.cursor()
+                cursore.execute('select c.name, c.last_name from admin a left JOIN customer c on a.customer_id=c.id where a.user_telegram_id=?', (int(id),))
+                # cursore.execute('select * from admin;')
+
+                db.commit()
+                return cursore.fetchall()
+        except Exception as _ex:
+            print(f'[SQLite] {_ex}')
+
+    def add_admin(test, user_name, user_telegram_id, customer_id, main_admin_id):
+        
+        try:
+            with sqlite3.connect('utils/db_api/database.db') as db:
+                cursore = db.cursor()
+                cursore.execute('insert into admin(main_admin_id, user_name, user_telegram_id, customer_id) values (?, ?, ?, ?)', (main_admin_id, user_name, user_telegram_id, customer_id))
+                # cursore.execute('select * from admin;')
+
+                db.commit()
+                return cursore.fetchall()
+        except Exception as _ex:
+            print(f'[SQLite] {_ex}')
+            return False
+
+    def delete_admin(self, id):
+        
+        try:
+            with sqlite3.connect('utils/db_api/database.db') as db:
+                cursore = db.cursor()
+                cursore.execute('delete from admin where user_telegram_id=?', (int(id),))
+                # cursore.execute('select * from admin;')
+
+                db.commit()
+                return cursore.fetchall()
+        except Exception as _ex:
+            print(f'[SQLite] {_ex}')
+
+    def find_main_admin_id(self, id):
+        try:
+            with sqlite3.connect('utils/db_api/database.db') as db:
+                cursore = db.cursor()
+                cursore.execute("select id from main_admin where user_telegram_id=?;", (str(id),))
+
+                db.commit()
+                return cursore.fetchall()
+        except Exception as _ex:
+            print(f'[SQLite] {_ex}')
 
     def start_mailing():
         pass
 
-product = Product()
-admin = Admin()
-def test_product():
-    try:
-        with sqlite3.connect('utils/db_api/database.db') as db:
-            cursore = db.cursor()
-            # cursore.execute('UPDATE product SET photo="AgACAgIAAxkBAAILWGLXDfbxFaEqs7HBaAABTv0LEPI6EAACR8ExG3nKuUoCcbmOCAWIpQEAAwIAA3MAAykE" WHERE id=15')
-            cursore.execute('select id, name, photo from product;')
+# product = Product()
+# admin = Admin()
 
-            db.commit()
-            return cursore.fetchall()
-    except Exception as _ex:
-        print(f'[SQLite] {_ex}') 
+# print(product.delete_product(16))
         
 # print(test_product())
 # print(admin.chek_admin(91510596))
+
+# product.delete_subcategory(input(), input())
 
